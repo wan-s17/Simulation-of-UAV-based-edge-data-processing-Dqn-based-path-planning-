@@ -136,7 +136,28 @@ for t in range(Ed):  #move first, get the data, offload collected data
 #            aft_feature.append(UAVlist[i].map_feature(region_rate,UAVlist,E_wait))    #recode the current feature
             rd=reward[i]/1000
             reward[i]=0
+    #        UAVlist[i].reward=reward
+    #        reward=get_data/(pre_data[i]+1)
+#            if OUT[i]>0:
+#                rd=-200000
+    
+    #        if get_data<700:
+    #            reward=-1
+    #        pre_data[i]=get_data
             UAVlist[i].reward=rd
+#            l_queue[t]=l_queue[t]+UAVlist[i].data_buf
+#            print("%f, %f, %f, %f"%(rd,UAVlist[i].data_buf,UAVlist[i].D_l,UAVlist[i].D_tr))
+    #        if UAVlist[i].data_buf>jud:
+    #            reward=reward/(reward-jud)
+#            if t>0:
+#                Center.remember(pre_feature[i],act_note[i],rd,aft_feature[i],i)  #record the training data 
+#    if t>1000:
+#        Center.epsilon=ep0
+#        Center.epsilon_decay=1
+#    if t>batch_size*pl_step and t%pl_step==0:
+#        for turn in range(num_UAV):
+##            Center.replay(batch_size,turn,t%reset_p_T)
+#            Center.replay(batch_size,turn,t-batch_size*pl_step)
 
     if t>0:
         ax.clear()
