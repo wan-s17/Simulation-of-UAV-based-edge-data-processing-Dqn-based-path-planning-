@@ -36,11 +36,11 @@ class Center_DQN:
         # Neural Net for Deep-Q learning Model
         model = keras.Sequential()
         model.add(keras.layers.Conv2D(32, (8,8), strides=4,activation='relu',input_shape = self.state_size))
-#        model.add(keras.layers.Dropout(0.25))
+        model.add(keras.layers.Dropout(0.25))
         model.add(keras.layers.Conv2D(64, (4,4), strides=2,activation='relu'))
         model.add(keras.layers.Conv2D(64, (3,3), strides=1,activation='relu'))
-#        model.add(keras.layers.MaxPooling2D(pool_size=(2, 2)))
-#        model.add(keras.layers.Dropout(0.25))
+        model.add(keras.layers.MaxPooling2D(pool_size=(2, 2)))
+        model.add(keras.layers.Dropout(0.25))
         model.add(keras.layers.Flatten())
         model.add(keras.layers.Dense(512, activation='relu'))
         model.add(keras.layers.Dense(self.action_size, activation='linear'))
@@ -165,3 +165,5 @@ class Center_DQN:
         self.model.save_weights(name)
         np.save("train_loss",self.loss)
 
+    def update_target_network(self):
+        self.tmodel.set_weights(self.model.get_weights())

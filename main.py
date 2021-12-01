@@ -12,11 +12,12 @@ from uav import UAV_agent
 from sensor import sensor_agent
 import matplotlib.pyplot as plt
 
-Ed=10000                             #total slot
+Ed=5000                          #total slot
 ep0=0.97
 batch_size=12                 #training samples per batch
 pl_step=5                    #How many steps will The system plan the next destination
-T=300                          #How many steps will the epslon be reset and the trained weights will be stored
+T=100                          #How many steps will the epslon be reset and the trained weights will be stored
+update_target=10
 com_r=60
 num1=5
 num2=4
@@ -93,6 +94,7 @@ for t in range(Ed):  #move first, get the data, offload collected data
     if t%T==0 and t>0:
         Center.epsilon=ep0
         Center.save("./save/center-dqn.h5")
+        np.save("record_rd3",Mentrd)
 
     if t%pl_step==0:
         pre_feature=[]
@@ -101,7 +103,7 @@ for t in range(Ed):  #move first, get the data, offload collected data
         for i in range(num_UAV): 
             pre_feature.append(UAVlist[i].map_feature(region_rate,UAVlist,E_wait))    #record former feature
             act=Center.act(pre_feature[i],fg)          # get the action V
-            act_note.append(act)                  #record the taken action
+            act_note.append(act)                       #record the taken action
     
     for i in range(num_UAV):
         OUT[i]=UAVlist[i].fresh_position(vlist[act_note[i]],region_obstacle)     #execute the action
@@ -133,46 +135,48 @@ for t in range(Ed):  #move first, get the data, offload collected data
         rdw=sum(sum(E_wait))
         print(t)
         for i in range(num_UAV):        #calculate the reward : need the modify
-#            aft_feature.append(UAVlist[i].map_feature(region_rate,UAVlist,E_wait))    #recode the current feature
+            aft_feature.append(UAVlist[i].map_feature(region_rate,UAVlist,E_wait))    #recode the current feature
             rd=reward[i]/1000
             reward[i]=0
-    #        UAVlist[i].reward=reward
-    #        reward=get_data/(pre_data[i]+1)
-#            if OUT[i]>0:
-#                rd=-200000
+            UAVlist[i].reward=rd
+           # reward=get_data/(pre_data[i]+1)
+           # if OUT[i]>0:
+           #     rd=-200000
     
     #        if get_data<700:
     #            reward=-1
     #        pre_data[i]=get_data
-            UAVlist[i].reward=rd
 #            l_queue[t]=l_queue[t]+UAVlist[i].data_buf
 #            print("%f, %f, %f, %f"%(rd,UAVlist[i].data_buf,UAVlist[i].D_l,UAVlist[i].D_tr))
     #        if UAVlist[i].data_buf>jud:
     #            reward=reward/(reward-jud)
-#            if t>0:
-#                Center.remember(pre_feature[i],act_note[i],rd,aft_feature[i],i)  #record the training data 
+            if t>0:
+                Center.remember(pre_feature[i], act_note[i], rd, aft_feature[i], i)  #record the training data
 #    if t>1000:
 #        Center.epsilon=ep0
 #        Center.epsilon_decay=1
-#    if t>batch_size*pl_step and t%pl_step==0:
-#        for turn in range(num_UAV):
-##            Center.replay(batch_size,turn,t%reset_p_T)
-#            Center.replay(batch_size,turn,t-batch_size*pl_step)
+    if t>batch_size*pl_step and t%pl_step==0:
+       for turn in range(num_UAV):
+#            Center.replay(batch_size,turn,t%reset_p_T)
+           Center.replay(batch_size,turn,t-batch_size*pl_step)
 
-    if t>0:
-        ax.clear()
-    plt.xlim((0,600))
-    plt.ylim((0,400))
-    plt.grid(True) #添加网格
+    if t%update_target==0:
+        Center.update_target_network()
 
-    ax.scatter(X,Y,c='b',marker='.')  #散点图
-#    if t>0:
-    plt.pause(0.1)
+#     if t>0:
+#         ax.clear()
+#     plt.xlim((0,600))
+#     plt.ylim((0,400))
+#     plt.grid(True) #添加网格
+#
+#     ax.scatter(X,Y,c='b',marker='.')  #散点图
+# #    if t>0:
+#     plt.pause(0.1)
 
     
-#np.save("record_rd3",Mentrd)
+np.save("record_rd3",Mentrd)
 np.save("cover_hungry_10",cover)
-fig=plt.figure()
-plt.plot(cover)
-plt.show()
+# fig=plt.figure()
+# plt.plot(cover)
+# plt.show()
 
